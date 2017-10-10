@@ -91,6 +91,16 @@ define orawls::utils::reportscomponents(
 
     } else {
 
+      file { "${download_dir}/${title}_reportsComponent.py":
+        ensure  => present,
+        content => template('orawls/wlst/wlstexec/fmw/createReportsComponent.py.erb'),
+        backup  => false,
+        replace => true,
+        mode    => '0775',
+        owner   => $os_user,
+        group   => $os_group,
+      }
+
       exec { "execwlst reportscomponent ${title}":
         command     => "${middleware_home_dir}/oracle_common/common/bin/wlst.sh ${download_dir}/${title}_reportsComponent.py \'${weblogic_password}\'",
         environment => ["JAVA_HOME=${jdk_home_dir}"],
