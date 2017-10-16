@@ -82,7 +82,7 @@ define orawls::utils::reportscomponents(
         command     => "${middleware_home_dir}/oracle_common/common/bin/wlst.sh ${download_dir}/${title}_reportsComponent.py \'${weblogic_password}\'",
         environment => ["JAVA_HOME=${jdk_home_dir}"],
         path        => $exec_path,
-        creates     => "${domain_dir}/system_components/${sys_component_dir}/${instance_name}",
+        creates     => "${domain_dir}/config/fmwconfig/components/${sys_component_dir}/${instance_name}",
         user        => $os_user,
         group       => $os_group,
         logoutput   => $log_output,
@@ -105,7 +105,7 @@ define orawls::utils::reportscomponents(
         command     => "${middleware_home_dir}/oracle_common/common/bin/wlst.sh ${download_dir}/${title}_reportsComponent.py \'${weblogic_password}\'",
         environment => ["JAVA_HOME=${jdk_home_dir}"],
         path        => $exec_path,
-        onlyif      => "test -d  ${domain_dir}/system_components/${sys_component_dir}/${instance_name}",
+        onlyif      => "test -d  ${domain_dir}/config/fmwconfig/components/${sys_component_dir}/${instance_name}",
         user        => $os_user,
         group       => $os_group,
         logoutput   => $log_output,
@@ -115,7 +115,7 @@ define orawls::utils::reportscomponents(
     }
 
   } else {
-    fail("${version} not support for orawls::utils::reportscomponents")
+    fail("${version} not supported for orawls::utils::reportscomponents")
   }
 
 }
