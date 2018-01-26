@@ -217,6 +217,10 @@ define orawls::domain (
       $templateOIM       = "${middleware_home_dir}/Oracle_IDM1/common/templates/applications/oracle.oim_11.1.2.0.0_template.jar"
       $templateOAM       = "${middleware_home_dir}/Oracle_IDM1/common/templates/applications/oracle.oam_ds_11.1.2.0.0_template.jar"
 
+      $templateOAAM        = "${middleware_home_dir}/Oracle_IDM1/common/templates/applications/oracle.oaam_common_11.1.2.0.0_template.jar"
+      $templateOAAM_admin  = "${middleware_home_dir}/Oracle_IDM1/common/templates/applications/oracle.oaam_admin_11.1.2.0.0_template.jar"
+      $templateOAAM_server = "${middleware_home_dir}/Oracle_IDM1/common/templates/applications/oracle.oaam_server_11.1.2.0.0_template.jar"
+
       $templateOUD       = "${middleware_home_dir}/Oracle_OUD1/common/templates/applications/oracle.odsm_11.1.1.5.0_template.jar"
 
       $templateOSB          = "${middleware_home_dir}/Oracle_OSB1/common/templates/applications/wlsb.jar"
@@ -456,6 +460,21 @@ define orawls::domain (
 
     } elsif $domain_template == 'oim' {
       $extensionsTemplateFile = 'orawls/domains/extensions/oim_oam_template.py.erb'
+
+      $wlstPath      = "${middleware_home_dir}/Oracle_IDM1/common/bin"
+
+    } elsif $domain_template == 'oaam' {
+      $extensionsTemplateFile = 'orawls/domains/extensions/oaam_template.py.erb'
+
+      $wlstPath      = "${middleware_home_dir}/Oracle_IDM1/common/bin"
+
+    } elsif $domain_template == 'oim_soa' {
+      $extensionsTemplateFile = 'orawls/domains/extensions/oim_soa_template.py.erb'
+
+      $wlstPath      = "${middleware_home_dir}/Oracle_IDM1/common/bin"
+
+    } elsif $domain_template == 'oam' {
+      $extensionsTemplateFile = 'orawls/domains/extensions/oam_template.py.erb'
 
       $wlstPath      = "${middleware_home_dir}/Oracle_IDM1/common/bin"
 
@@ -803,7 +822,7 @@ define orawls::domain (
       require =>  Exec["execwlst ${domain_name} ${title}"],
     }
 
-    if ($domain_template == 'oim') {
+    if ($domain_template == 'oim' or $domain_template == 'oim_soa' or $domain_template == 'oam' or $domain_template == 'oaam') {
 
       file { "${download_dir}/${title}psa_opss_upgrade.rsp":
         ensure  => present,
