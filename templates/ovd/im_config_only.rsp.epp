@@ -3,6 +3,7 @@
        String $weblogic_user,
        String $weblogic_password,
        String $adminserver_address,
+       Integer $adminserver_port,
        String $domain_name,
        String $ovd_instance_name,
        String $ovd_ldap_namespace,
@@ -15,7 +16,10 @@ Response File Version=1.0.0.0.0
 [GENERIC]
 
 #Provide true to create a new weblogic domain. WebLogic Server must already be installed.
-CREATE_NEW_DOMAIN=true
+CREATE_NEW_DOMAIN=false
+
+#Provide true to extend domain. WebLogic Server must already be installed and the domain must be up and running.
+USE_EXISTING_DOMAIN=true
 
 #Domain name may only contain alphanumeric characters or the underscore (_) or hyphen (-) characters.
 DOMAIN_NAME=<%= $domain_name %>
@@ -34,6 +38,9 @@ ADMINISTRATOR_PASSWORD_CONFIRM=<%= $weblogic_password %>
 
 #Provide the localhost name for Create Domain and machine name on which domain is up and running for Extend Domain and Expand Cluster.
 DOMAIN_HOST_NAME=<%= $adminserver_address %>
+
+#Provide the port in which domain is up and running. Required for Extend Domain and Expand Cluster.
+DOMAIN_PORT_NO=<%= $adminserver_port %>
 
 #Write the complete path to a valid Middleware Home.
 AS_HOME_LOCATION=<%= $middleware_home_dir %>

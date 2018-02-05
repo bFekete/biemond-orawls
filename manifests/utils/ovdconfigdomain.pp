@@ -1,7 +1,7 @@
 #
 # utils::ovdconfigdomain define
 #
-# does all the Oracle Identity Management configuration for OVD. Creates a domain for OVD.
+# Does all the Oracle Identity Management configuration for OVD. Extends an ADF domain for OVD.
 #
 # @param version used weblogic software like 1036
 # @param ovd_instance_name The name of the OVD instance
@@ -66,6 +66,7 @@ define orawls::utils::ovdconfigdomain(
       'weblogic_home_dir'   => $weblogic_home_dir,
       'middleware_home_dir' => $middleware_home_dir,
       'adminserver_address' => $adminserver_address,
+      'adminserver_port'    => $adminserver_port,
       'weblogic_user'       => $weblogic_user,
       'weblogic_password'   => $weblogic_password,
       'domain_name'         => $domain_name,
@@ -83,7 +84,7 @@ define orawls::utils::ovdconfigdomain(
     command   => "/bin/sh -c 'unset DISPLAY;${ovd_home}/bin/config.sh -silent -response ${download_dir}/${title}config_ovd_server.rsp -waitforcompletion -debug -logLevel fine'",
     timeout   => 0,
     require   => File["${download_dir}/${title}config_ovd_server.rsp"],
-    creates   => $domain_dir,
+    creates   => "${middleware_home_dir}/${ovd_instance_name}",
     path      => $exec_path,
     user      => $os_user,
     group     => $os_group,
