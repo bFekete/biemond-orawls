@@ -3,6 +3,8 @@
 #
 # does all the Oracle Identity Management configuration
 #
+# @todo Make config execs idempotent.
+#
 # @param version used weblogic software like 1036
 # @param wls_domains_dir root directory for all the WebLogic domains
 # @param middleware_home_dir directory of the Oracle software inside the oracle base directory
@@ -92,7 +94,6 @@ define orawls::utils::oimconfig(
     exec { "config oim remote ${title}":
       command   => "${oim_home}/bin/config.sh -silent -response ${download_dir}/${title}config_oim_remote.rsp -waitforcompletion",
       timeout   => 0,
-      onlyif    => "${remote_config} == true",
       require   => File["${download_dir}/${title}config_oim_remote.rsp"],
       path      => $exec_path,
       user      => $os_user,
@@ -181,6 +182,7 @@ define orawls::utils::oimconfig(
 
       orawls::control{'stopOIMOimServer1AfterConfig':
         weblogic_home_dir   => $weblogic_home_dir,
+        middleware_home_dir => $middleware_home_dir,
         jdk_home_dir        => $jdk_home_dir,
         wls_domains_dir     => $domains_dir,
         domain_name         => $domain_name,
@@ -202,6 +204,7 @@ define orawls::utils::oimconfig(
 
       orawls::control{'stopOIMSoaServer1AfterConfig':
         weblogic_home_dir   => $weblogic_home_dir,
+        middleware_home_dir => $middleware_home_dir,
         jdk_home_dir        => $jdk_home_dir,
         wls_domains_dir     => $domains_dir,
         domain_name         => $domain_name,
@@ -224,6 +227,7 @@ define orawls::utils::oimconfig(
 
       orawls::control{'stopOIMAdminServerAfterConfig':
         weblogic_home_dir   => $weblogic_home_dir,
+        middleware_home_dir => $middleware_home_dir,
         jdk_home_dir        => $jdk_home_dir,
         wls_domains_dir     => $domains_dir,
         domain_name         => $domain_name,
@@ -247,6 +251,7 @@ define orawls::utils::oimconfig(
 
       orawls::control{'startOIMAdminServerAfterConfig':
         weblogic_home_dir   => $weblogic_home_dir,
+        middleware_home_dir => $middleware_home_dir,
         jdk_home_dir        => $jdk_home_dir,
         wls_domains_dir     => $domains_dir,
         domain_name         => $domain_name,
