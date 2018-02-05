@@ -11,7 +11,6 @@
 # @param middleware_home_dir directory of the Oracle software inside the oracle base directory
 # @param domain_name the domain name which to create
 # @param adminserver_address the adminserver network name or ip, default = localhost
-# @param adminserver_port the adminserver port number, default = 7001
 # @param weblogic_user the weblogic administrator username
 # @param weblogic_password the weblogic domain password
 # @param weblogic_home_dir directory of the WebLogic software inside the middleware directory
@@ -35,8 +34,6 @@ define orawls::utils::ovdconfigdomain(
   String $domain_name                                     = undef,
   String $adminserver_name                                = 'AdminServer',
   String $adminserver_address                             = 'localhost',
-  Integer $adminserver_port                               = 7001,
-  Integer $nodemanager_port                               = 5556,
   String $weblogic_user                                   = 'weblogic',
   String $weblogic_password                               = undef,
   String $os_user                                         = $::orawls::weblogic::os_user,
