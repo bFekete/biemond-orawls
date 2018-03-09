@@ -371,19 +371,35 @@ define orawls::fmw(
 
   } elsif ( ( $fmw_product == 'oim' ) or ( $fmw_product == 'oam' ) ) {
 
-    $fmw_silent_response_file = 'orawls/fmw_silent_oim.rsp.epp'
-    if ($oracle_home_dir == undef) {
-      $oracleHome = "${middleware_home_dir}/Oracle_IDM1"
-    }
-    else {
-      $oracleHome = $oracle_home_dir
-    }
-    $createFile1 = "${download_dir}/${sanitised_title}/Disk1"
-    $createFile2 = "${download_dir}/${sanitised_title}/Disk2"
-    $createFile3 = "${download_dir}/${sanitised_title}/Disk3"
+    if $version == 1221 {
+      $fmw_silent_response_file = 'orawls/fmw_silent_oim_1221.rsp.epp'
+      $install_type             = 'Collocated Oracle Identity and Access Manager (Managed through WebLogic server)'
+      $binFile1                 = 'fmw_12.2.1.3.0_idm.jar'
+      $createFile1              = "${download_dir}/${sanitised_title}/${binFile1}"
+      $type                     = 'java'
 
-    $total_files = 3
-    $install_type = 'dummy'
+      $total_files = 1
+
+      if ($oracle_home_dir == undef) {
+        $oracleHome = "${middleware_home_dir}/idm"
+      }
+      else {
+        $oracleHome = $oracle_home_dir
+      }
+    } else {
+      $fmw_silent_response_file = 'orawls/fmw_silent_oim.rsp.epp'
+      if ($oracle_home_dir == undef) {
+        $oracleHome = "${middleware_home_dir}/Oracle_IDM1"
+      }
+      else {
+        $oracleHome = $oracle_home_dir
+      }
+      $createFile1 = "${download_dir}/${sanitised_title}/Disk1"
+      $createFile2 = "${download_dir}/${sanitised_title}/Disk2"
+      $createFile3 = "${download_dir}/${sanitised_title}/Disk3"
+      $total_files = 3
+      $install_type = 'dummy'
+    }
 
   } elsif ( $fmw_product == 'ovd' ) {
 
@@ -567,17 +583,34 @@ define orawls::fmw(
 
   } elsif ( $fmw_product == 'oud' ) {
 
-    $fmw_silent_response_file = 'orawls/fmw_silent_oud.rsp.epp'
-    $createFile1              = "${download_dir}/${sanitised_title}/Disk1"
-    $install_type             = 'dummy'
+    if $version == 1221 {
+      $fmw_silent_response_file = 'orawls/fmw_silent_oud_1221.rsp.epp'
+      $install_type             = 'Collocated Oracle Unified Directory Server (Managed through WebLogic server)'
+      $binFile1                 = 'fmw_12.2.1.3.0_oud.jar'
+      $createFile1              = "${download_dir}/${sanitised_title}/${binFile1}"
+      $type                     = 'java'
 
+      if ($oracle_home_dir == undef) {
+        $oracleHome = "${middleware_home_dir}/oud"
+      }
+      else {
+        $oracleHome = $oracle_home_dir
+      }
 
-    if ($oracle_home_dir == undef) {
-      $oracleHome = "${middleware_home_dir}/Oracle_OUD1"
+    } else {
+      $fmw_silent_response_file = 'orawls/fmw_silent_oud.rsp.epp'
+      $createFile1              = "${download_dir}/${sanitised_title}/Disk1"
+      $install_type             = 'dummy'
+
+      if ($oracle_home_dir == undef) {
+        $oracleHome = "${middleware_home_dir}/Oracle_OUD1"
+      }
+      else {
+        $oracleHome = $oracle_home_dir
+      }
+
     }
-    else {
-      $oracleHome = $oracle_home_dir
-    }
+
     $total_files = 1
 
   } else {
