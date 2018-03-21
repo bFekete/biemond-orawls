@@ -65,6 +65,44 @@ change_datasource_to_xa('SOADataSource')
 
 print 'Finished datasources'
 
+print 'Creating Credentials for Keystore'
+cd('/')
+cd('Credential/TargetStore/oim')
+cd('TargetKey/keystore')
+create('c','Credential')
+cd('Credential')
+set('Username','keystore')
+set('Password', ADMIN_PASSWORD)
+
+print 'Creating Credentials for OIMSchema'
+cd('/')
+cd('Credential/TargetStore/oim')
+cd('TargetKey/OIMSchemaPassword')
+create('c','Credential')
+cd('Credential')
+set('Username', REPOS_DBUSER_PREFIX + '_OIM')
+set('Password', REPOS_DBPASSWORD)
+
+print 'Creating Credentials for sysadmin'
+cd('/')
+cd('Credential/TargetStore/oim')
+cd('TargetKey/sysadmin')
+create('c','Credential')
+cd('Credential')
+set('Username','xelsysadm')
+set('Password', ADMIN_PASSWORD)
+
+print 'Creating Credentials for WeblogicAdmin'
+cd('/')
+cd('Credential/TargetStore/oim')
+cd('TargetKey/WeblogicAdminKey')
+create('c','Credential')
+cd('Credential')
+set('Username', ADMIN_USER)
+set('Password', ADMIN_PASSWORD)
+
+print 'Finished creating credentials'
+
 updateDomain()
 dumpStack()
 closeDomain()
