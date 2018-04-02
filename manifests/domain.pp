@@ -221,6 +221,10 @@ define orawls::domain (
       $templateOIM       = "${middleware_home_dir}/Oracle_IDM1/common/templates/applications/oracle.oim_11.1.2.0.0_template.jar"
       $templateOAM       = "${middleware_home_dir}/Oracle_IDM1/common/templates/applications/oracle.oam_ds_11.1.2.0.0_template.jar"
 
+      $templateOAAM        = "${middleware_home_dir}/Oracle_IDM1/common/templates/applications/oracle.oaam_common_11.1.2.0.0_template.jar"
+      $templateOAAM_admin  = "${middleware_home_dir}/Oracle_IDM1/common/templates/applications/oracle.oaam_admin_11.1.2.0.0_template.jar"
+      $templateOAAM_server = "${middleware_home_dir}/Oracle_IDM1/common/templates/applications/oracle.oaam_server_11.1.2.0.0_template.jar"
+
       $templateOUD       = "${middleware_home_dir}/Oracle_OUD1/common/templates/applications/oracle.odsm_11.1.1.5.0_template.jar"
 
       $templateOSB          = "${middleware_home_dir}/Oracle_OSB1/common/templates/applications/wlsb.jar"
@@ -313,6 +317,7 @@ define orawls::domain (
         }
       }
 
+      $templateOUD       = "${middleware_home_dir}/oud/common/templates/wls/oracle.odsm_template.jar"
       $templateApplCore  = "${middleware_home_dir}/oracle_common/common/templates/wls/oracle.applcore.model.stub_template.jar"
       $templateWSMPM     = "${middleware_home_dir}/oracle_common/common/templates/wls/oracle.wsmpm_template.jar"
 
@@ -463,10 +468,36 @@ define orawls::domain (
 
       $wlstPath      = "${middleware_home_dir}/Oracle_IDM1/common/bin"
 
-    } elsif $domain_template == 'oud' {
-      $extensionsTemplateFile = 'orawls/domains/extensions/oud_template.py.erb'
+   } elsif $domain_template == 'oaam' {
+      $extensionsTemplateFile = 'orawls/domains/extensions/oaam_template.py.erb'
 
-      $wlstPath      = "${weblogic_home_dir}/common/bin"
+      $wlstPath      = "${middleware_home_dir}/Oracle_IDM1/common/bin"
+
+    } elsif $domain_template == 'oim_soa' {
+
+      if ( $version >= 1221 ) {
+        $extensionsTemplateFile = 'orawls/domains/extensions/oim_soa_1221_template.py.erb'
+        $wlstPath      = "${middleware_home_dir}/oracle_common/common/bin"
+      }
+      else {
+        $extensionsTemplateFile = 'orawls/domains/extensions/oim_soa_template.py.erb'
+        $wlstPath      = "${middleware_home_dir}/Oracle_IDM1/common/bin"
+      }
+
+    } elsif $domain_template == 'oam' {
+      $extensionsTemplateFile = 'orawls/domains/extensions/oam_template.py.erb'
+
+      $wlstPath      = "${middleware_home_dir}/Oracle_IDM1/common/bin"
+
+    } elsif $domain_template == 'oud' {
+      if ( $version >= 1221 ) {
+        $wlstPath      = "${middleware_home_dir}/oracle_common/common/bin"
+        $extensionsTemplateFile = 'orawls/domains/extensions/oud_oudsm_template.py.erb'
+      }
+      else {
+        $wlstPath      = "${weblogic_home_dir}/common/bin"
+        $extensionsTemplateFile = 'orawls/domains/extensions/oud_template.py.erb'
+      }
 
     } elsif $domain_template == 'wc' {
       $extensionsTemplateFile = 'orawls/domains/extensions/wc_template.py.erb'
@@ -694,6 +725,10 @@ define orawls::domain (
         $rcu_domain_template = 'wcs'
       } elsif ( $domain_template == 'forms' ){
         $rcu_domain_template = 'forms'
+      } elsif ( $domain_template == 'oud' ){
+        $rcu_domain_template = 'oud'
+      } elsif ( $domain_template == 'oim_soa' ){
+        $rcu_domain_template = 'oim'
       } elsif ($create_rcu == undef or $create_rcu == true) {
         fail('unkown domain_template for rcu with version 1212 or 1213')
       }
@@ -809,51 +844,70 @@ define orawls::domain (
       require =>  Exec["execwlst ${domain_name} ${title}"],
     }
 
-    if ($domain_template == 'oim') {
+    if ($domain_template == 'oim' or $domain_template == 'oim_soa' or $domain_template == 'oam' or $domain_template == 'oaam') {
 
-      file { "${download_dir}/${title}psa_opss_upgrade.rsp":
-        ensure  => present,
-        content => template('orawls/oim/psa_opss_upgrade.rsp.erb'),
-        mode    => lookup('orawls::permissions'),
-        owner   => $os_user,
-        group   => $os_group,
-        backup  => false,
-      }
+      if $version < 1211 {
 
-      exec { "exec PSA OPSS store upgrade ${domain_name} ${title}":
-        command => "${middleware_home_dir}/oracle_common/bin/psa -response ${download_dir}/${title}psa_opss_upgrade.rsp",
-        require => [Exec["execwlst ${domain_name} ${title}"],
-                    Exec["execwlst ${domain_name} extension ${title}"],
-                    File["${download_dir}/${title}psa_opss_upgrade.rsp"],],
-        timeout => 0,
-        cwd     => $download_dir, # Added since psa binary saves and changes to current dir
-        path    => $exec_path,
-        user    => $os_user,
-        group   => $os_group,
-      }
+        file { "${download_dir}/${title}psa_opss_upgrade.rsp":
+          ensure  => present,
+          content => template('orawls/oim/psa_opss_upgrade.rsp.erb'),
+          mode    => lookup('orawls::permissions'),
+          owner   => $os_user,
+          group   => $os_group,
+          backup  => false,
+        }
 
-      exec { "execwlst create OPSS store ${domain_name} ${title}":
-        command     => "${wlstPath}/wlst.sh ${middleware_home_dir}/Oracle_IDM1/common/tools/configureSecurityStore.py -d ${domain_dir} -m create -c IAM -p ${repository_password}",
-        environment => ["JAVA_HOME=${jdk_home_dir}"],
-        require     => [Exec["execwlst ${domain_name} ${title}"],
-                        Exec["execwlst ${domain_name} extension ${title}"],
-                        Exec["exec PSA OPSS store upgrade ${domain_name} ${title}"],],
-        timeout     => 0,
-        path        => $exec_path,
-        user        => $os_user,
-        group       => $os_group,
-      }
+        exec { "exec PSA OPSS store upgrade ${domain_name} ${title}":
+          command => "${middleware_home_dir}/oracle_common/bin/psa -response ${download_dir}/${title}psa_opss_upgrade.rsp",
+          require => [Exec["execwlst ${domain_name} ${title}"],
+                      Exec["execwlst ${domain_name} extension ${title}"],
+                      File["${download_dir}/${title}psa_opss_upgrade.rsp"],],
+          timeout => 0,
+          cwd     => $download_dir, # Added since psa binary saves and changes to current dir
+          path    => $exec_path,
+          user    => $os_user,
+          group   => $os_group,
+        }
 
-      exec { "execwlst validate OPSS store ${domain_name} ${title}":
-        command     => "${wlstPath}/wlst.sh ${middleware_home_dir}/Oracle_IDM1/common/tools/configureSecurityStore.py -d ${domain_dir} -m validate",
-        environment => ["JAVA_HOME=${jdk_home_dir}"],
-        require     => [Exec["execwlst ${domain_name} ${title}"],
-                        Exec["execwlst ${domain_name} extension ${title}"],
-                        Exec["execwlst create OPSS store ${domain_name} ${title}"]],
-        timeout     => 0,
-        path        => $exec_path,
-        user        => $os_user,
-        group       => $os_group,
+        exec { "execwlst create OPSS store ${domain_name} ${title}":
+          command     => "${wlstPath}/wlst.sh ${middleware_home_dir}/Oracle_IDM1/common/tools/configureSecurityStore.py -d ${domain_dir} -m create -c IAM -p ${repository_password}",
+          environment => ["JAVA_HOME=${jdk_home_dir}"],
+          require     => [Exec["execwlst ${domain_name} ${title}"],
+                          Exec["execwlst ${domain_name} extension ${title}"],
+                          Exec["exec PSA OPSS store upgrade ${domain_name} ${title}"],],
+          timeout     => 0,
+          path        => $exec_path,
+          user        => $os_user,
+          group       => $os_group,
+        }
+
+        exec { "execwlst validate OPSS store ${domain_name} ${title}":
+          command     => "${wlstPath}/wlst.sh ${middleware_home_dir}/Oracle_IDM1/common/tools/configureSecurityStore.py -d ${domain_dir} -m validate",
+          environment => ["JAVA_HOME=${jdk_home_dir}"],
+          require     => [Exec["execwlst ${domain_name} ${title}"],
+                          Exec["execwlst ${domain_name} extension ${title}"],
+                          Exec["execwlst create OPSS store ${domain_name} ${title}"]],
+          timeout     => 0,
+          path        => $exec_path,
+          user        => $os_user,
+          group       => $os_group,
+        }
+
+      } else {
+
+        exec { "offlineConfigManager ${domain_name} ${title}":
+          command     => "sh offlineConfigManager.sh",
+          cwd         => "${middleware_home_dir}/idm/server/bin",
+          creates     => "${domain_dir}/config/fmwconfig/owsm/store/owsm/policies/oracle/multi_token_noauth_over_ssl_rest_service_policy",
+          environment => ["JAVA_HOME=${jdk_home_dir}", "DOMAIN_HOME=${domain_dir}"],
+          require     => [Exec["execwlst ${domain_name} ${title}"],
+                          Exec["execwlst ${domain_name} extension ${title}"],],
+          timeout     => 0,
+          path        => $exec_path,
+          user        => $os_user,
+          group       => $os_group,
+        }
+
       }
 
     }
