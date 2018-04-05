@@ -485,9 +485,14 @@ define orawls::domain (
       }
 
     } elsif $domain_template == 'oam' {
-      $extensionsTemplateFile = 'orawls/domains/extensions/oam_template.py.erb'
 
-      $wlstPath      = "${middleware_home_dir}/Oracle_IDM1/common/bin"
+      if ( $version >= 1221 ) {
+        $wlstPath      = "${middleware_home_dir}/oracle_common/common/bin"
+      } else {
+        $wlstPath      = "${middleware_home_dir}/Oracle_IDM1/common/bin"
+      }
+
+      $extensionsTemplateFile = 'orawls/domains/extensions/oam_template.py.erb'
 
     } elsif $domain_template == 'oud' {
       if ( $version >= 1221 ) {
@@ -729,6 +734,8 @@ define orawls::domain (
         $rcu_domain_template = 'oud'
       } elsif ( $domain_template == 'oim_soa' ){
         $rcu_domain_template = 'oim'
+      } elsif ( $domain_template == 'oam' ){
+        $rcu_domain_template = 'oam'
       } elsif ($create_rcu == undef or $create_rcu == true) {
         fail('unkown domain_template for rcu with version 1212 or 1213')
       }
@@ -895,17 +902,19 @@ define orawls::domain (
 
       } else {
 
-        exec { "offlineConfigManager ${domain_name} ${title}":
-          command     => "sh offlineConfigManager.sh",
-          cwd         => "${middleware_home_dir}/idm/server/bin",
-          creates     => "${domain_dir}/config/fmwconfig/owsm/store/owsm/policies/oracle/multi_token_noauth_over_ssl_rest_service_policy",
-          environment => ["JAVA_HOME=${jdk_home_dir}", "DOMAIN_HOME=${domain_dir}"],
-          require     => [Exec["execwlst ${domain_name} ${title}"],
-                          Exec["execwlst ${domain_name} extension ${title}"],],
-          timeout     => 0,
-          path        => $exec_path,
-          user        => $os_user,
-          group       => $os_group,
+        if ($domain_template == 'oim' or $domain_template == 'oim_soa') {
+          exec { "offlineConfigManager ${domain_name} ${title}":
+            command     => "sh offlineConfigManager.sh",
+            cwd         => "${middleware_home_dir}/idm/server/bin",
+            creates     => "${domain_dir}/config/fmwconfig/owsm/store/owsm/policies/oracle/multi_token_noauth_over_ssl_rest_service_policy",
+            environment => ["JAVA_HOME=${jdk_home_dir}", "DOMAIN_HOME=${domain_dir}"],
+            require     => [Exec["execwlst ${domain_name} ${title}"],
+                            Exec["execwlst ${domain_name} extension ${title}"],],
+            timeout     => 0,
+            path        => $exec_path,
+            user        => $os_user,
+            group       => $os_group,
+          }
         }
 
       }

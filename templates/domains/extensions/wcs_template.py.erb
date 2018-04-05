@@ -32,27 +32,26 @@ REPOS_DBPASSWORD = '<%= @repository_password %>'
 
 readDomain(DOMAIN_PATH)
 
-# Todo: Add logic to turn version into this but 12.2.1.2 turns into 12.2.1.2.0
-TEMPLATE_VERSION = '12.2.1.2.0'
-
 <% if @wcs_satellite %>
 print 'Adding Template: Oracle WebCenter Sites - Satellite Server' 
-selectTemplate('Oracle WebCenter Sites - Satellite Server', TEMPLATE_VERSION)
+selectTemplate('Oracle WebCenter Sites - Satellite Server')
 <% else %>
 print 'Adding Template: Oracle WebCenter Sites' 
-selectTemplate('Oracle WebCenter Sites', TEMPLATE_VERSION)
+selectTemplate('Oracle WebCenter Sites')
 
 print 'Adding Template: Oracle WebCenter Sites  - Visitor Services' 
-selectTemplate('Oracle WebCenter Sites - Visitor Services', TEMPLATE_VERSION)
+selectTemplate('Oracle WebCenter Sites - Visitor Services')
 
 print 'Adding Template: Oracle WebCenter Sites - SiteCapture' 
-selectTemplate('Oracle WebCenter Sites - SiteCapture', TEMPLATE_VERSION)
+selectTemplate('Oracle WebCenter Sites - SiteCapture')
 <% end %>
 
 print('Loading all required templates')
 loadTemplates()
 
 dumpStack()
+
+setOption('AppDir', APP_PATH)
 
 print 'Change datasources'
 
@@ -73,6 +72,12 @@ getDatabaseDefaults()
 
 updateDomain()
 closeDomain()
+
+<% if !@wcs_satellite %>
+create_boot_properties_file(DOMAIN_PATH + '/servers/wcsites_server1/security', 'boot.properties', ADMIN_USER, ADMIN_PASSWORD)
+create_boot_properties_file(DOMAIN_PATH + '/servers/sitecapture_server1/security', 'boot.properties', ADMIN_USER, ADMIN_PASSWORD)
+create_boot_properties_file(DOMAIN_PATH + '/servers/visitorservices_server1/security', 'boot.properties', ADMIN_USER, ADMIN_PASSWORD)
+<% end %>
 
 print 'Exiting...'
 exit()

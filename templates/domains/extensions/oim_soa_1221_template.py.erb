@@ -55,6 +55,16 @@ loadTemplates()
 
 dumpStack()
 
+setOption('AppDir', APP_PATH)
+
+print 'Change oim_server1'
+cd('/')
+change_managed_server('oim_server1', '<%= @adminserver_machine_name %>', '<%= @adminserver_address %>', None, OIM_JAVA_ARGUMENTS, '<%= @oim_nodemanager_log_dir %>', JAVA_HOME, JSSE_ENABLED)
+
+print 'Change soa_server1'
+cd('/')
+change_managed_server('soa_server1', '<%= @adminserver_machine_name %>', '<%= @adminserver_address %>', None, SOA_JAVA_ARGUMENTS, '<%= @soa_nodemanager_log_dir %>', JAVA_HOME, JSSE_ENABLED)
+
 print 'Change datasources'
 
 change_datasource('LocalSvcTblDataSource', REPOS_DBUSER_PREFIX + '_STB', REPOS_DBPASSWORD, REPOS_DBURL)
@@ -125,7 +135,6 @@ change_managed_server('oim_server1', '<%= @adminserver_machine_name %>', '<%= @a
 
 create_boot_properties_file(DOMAIN_PATH + '/servers/oim_server1/security', 'boot.properties', ADMIN_USER, ADMIN_PASSWORD)
 create_boot_properties_file(DOMAIN_PATH + '/servers/soa_server1/security', 'boot.properties', ADMIN_USER, ADMIN_PASSWORD)
-
 
 updateDomain()
 dumpStack()

@@ -21,7 +21,7 @@
 #
 define orawls::utils::rcu(
   Integer $version                                     = $::orawls::weblogic::version,
-  Enum['adf','soa','mft', 'wcs', 'forms', 'oud', 'oim'] $fmw_product = 'adf',
+  Enum['adf','soa','mft', 'wcs', 'forms', 'oud', 'oim', 'oam'] $fmw_product = 'adf',
   String $oracle_fmw_product_home_dir                  = undef,
   String $jdk_home_dir                                 = $::orawls::weblogic::jdk_home_dir,
   String $os_user                                      = $::orawls::weblogic::os_user,
@@ -90,6 +90,10 @@ define orawls::utils::rcu(
   elsif $fmw_product == 'oim' {
     $components = '-component OIM -component MDS -component IAU -component IAU_APPEND -component IAU_VIEWER -component OPSS -component WLS -component STB -component UCSUMS -component ESS -component SOAINFRA '
     $componentsPasswords = [$rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password] 
+  }
+  elsif $fmw_product == 'oam' {
+    $components = '-component OAM -component MDS -component IAU -component IAU_APPEND -component IAU_VIEWER -component OPSS -component WLS -component STB -component UCSUMS '
+    $componentsPasswords = [$rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password]
   }
   elsif $fmw_product == 'mft' {
     $components = "-component MDS ${rcu_temp_tablespace_cmd} ${rcu_tablespace_cmd} -component IAU ${rcu_temp_tablespace_cmd} ${rcu_tablespace_cmd} -component IAU_APPEND ${rcu_temp_tablespace_cmd} ${rcu_tablespace_cmd} -component IAU_VIEWER ${rcu_temp_tablespace_cmd} ${rcu_tablespace_cmd} -component OPSS ${rcu_temp_tablespace_cmd} ${rcu_tablespace_cmd} -component WLS ${rcu_temp_tablespace_cmd} ${rcu_tablespace_cmd} -component UCSCC ${rcu_temp_tablespace_cmd} ${rcu_tablespace_cmd} -component MFT ${rcu_temp_tablespace_cmd} ${rcu_tablespace_cmd} -component UCSUMS ${rcu_temp_tablespace_cmd} ${rcu_tablespace_cmd} -component ESS ${rcu_temp_tablespace_cmd} ${rcu_tablespace_cmd}"
