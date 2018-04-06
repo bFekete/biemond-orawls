@@ -106,7 +106,7 @@ define orawls::domain (
   String $jdk_home_dir                                    = $::orawls::weblogic::jdk_home_dir,
   Optional[String] $wls_domains_dir                       = $::orawls::weblogic::wls_domains_dir,
   Optional[String] $wls_apps_dir                          = $::orawls::weblogic::wls_apps_dir,
-  String $domain_template                                 = 'standard', # adf|adf_restricted|forms|osb|osb_soa_bpm|osb_soa|soa|soa_bpm|bam|wc|wcs|wc_wcc_bpm|oud|ohs_standalone
+  String $domain_template                                 = 'standard', # adf|adf_restricted|forms|osb|osb_soa_bpm|osb_soa|soa|soa_bpm|bam|wc|wcs|wc_wcc_bpm|oud|ohs_standalone|ohs_collocated
   Boolean $bam_enabled                                    = true,  #only for SOA Suite
   Boolean $b2b_enabled                                    = false, #only for SOA Suite 12.1.3 with b2b
   Boolean $ess_enabled                                    = false, #only for SOA Suite 12.1.3
@@ -504,6 +504,15 @@ define orawls::domain (
         $extensionsTemplateFile = 'orawls/domains/extensions/oud_template.py.erb'
       }
 
+    }
+    elsif $domain_template == 'ohs_collocated' {
+      if ($version >= 1221) {
+        $extensionsTemplateFile = 'orawls/domains/extensions/ohs_collocated_template.py.erb'
+        $wlstPath               = "${middleware_home_dir}/oracle_common/common/bin"
+      }
+      else {
+        fail("Oracle HTTP Server (Collocated)  domain configuration currently works only with versions 12.2.1.#. Version ${version} not supported.")
+      }
     } elsif $domain_template == 'wc' {
       $extensionsTemplateFile = 'orawls/domains/extensions/wc_template.py.erb'
 
@@ -736,6 +745,8 @@ define orawls::domain (
         $rcu_domain_template = 'oim'
       } elsif ( $domain_template == 'oam' ){
         $rcu_domain_template = 'oam'
+      } elsif ( $domain_template == 'ohs_collocated' ){
+        $rcu_domain_template = 'ohs_collocated'
       } elsif ($create_rcu == undef or $create_rcu == true) {
         fail('unkown domain_template for rcu with version 1212 or 1213')
       }

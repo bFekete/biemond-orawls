@@ -583,7 +583,7 @@ define orawls::fmw(
 
   } elsif ( $fmw_product == 'oud' ) {
 
-    if $version == 1221 {
+    if $version == 12213 {
       $fmw_silent_response_file = 'orawls/fmw_silent_oud_1221.rsp.epp'
       $install_type             = 'Collocated Oracle Unified Directory Server (Managed through WebLogic server)'
       $binFile1                 = 'fmw_12.2.1.3.0_oud.jar'

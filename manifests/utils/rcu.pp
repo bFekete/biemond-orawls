@@ -21,7 +21,7 @@
 #
 define orawls::utils::rcu(
   Integer $version                                     = $::orawls::weblogic::version,
-  Enum['adf','soa','mft', 'wcs', 'forms', 'oud', 'oim', 'oam'] $fmw_product = 'adf',
+  Enum['adf','soa','mft', 'wcs', 'forms', 'oud', 'oim', 'oam', 'ohs_collocated'] $fmw_product = 'adf',
   String $oracle_fmw_product_home_dir                  = undef,
   String $jdk_home_dir                                 = $::orawls::weblogic::jdk_home_dir,
   String $os_user                                      = $::orawls::weblogic::os_user,
@@ -84,6 +84,10 @@ define orawls::utils::rcu(
     }
   }
   elsif $fmw_product == 'oud' {
+    $components = '-component STB -component IAU -component IAU_APPEND -component IAU_VIEWER -component OPSS -component WLS'
+    $componentsPasswords = [$rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password] # 2 passwords required for WLS
+  }
+  elsif $fmw_product == 'ohs_collocated' {
     $components = '-component STB -component IAU -component IAU_APPEND -component IAU_VIEWER -component OPSS -component WLS'
     $componentsPasswords = [$rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password, $rcu_password] # 2 passwords required for WLS
   }

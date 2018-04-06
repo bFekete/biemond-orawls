@@ -32,11 +32,8 @@ REPOS_DBPASSWORD = '<%= @repository_password %>'
 
 readDomain(DOMAIN_PATH)
 
-print 'Adding Template: Oracle Unified Directory' 
-selectTemplate('Oracle Unified Directory')
-
-print 'Adding Template: Oracle Unified Directory Services Manager' 
-selectTemplate('Oracle Unified Directory Services Manager')
+print 'Adding Template: Oracle HTTP Server (Collocated)' 
+selectTemplate('Oracle HTTP Server (Collocated)')
 
 print('Loading all required templates')
 loadTemplates()
@@ -48,16 +45,19 @@ setOption('AppDir', APP_PATH)
 print 'Change datasources'
 
 change_datasource('LocalSvcTblDataSource', REPOS_DBUSER_PREFIX + '_STB', REPOS_DBPASSWORD, REPOS_DBURL)
+
+print 'Call getDatabaseDefaults which reads the service table'
+
+getDatabaseDefaults()
+change_datasource('WLSSchemaDataSource', REPOS_DBUSER_PREFIX + '_WLS_RUNTIME', REPOS_DBPASSWORD, REPOS_DBURL)
+change_datasource('opss-data-source', REPOS_DBUSER_PREFIX + '_OPSS', REPOS_DBPASSWORD, REPOS_DBURL)
 change_datasource('opss-audit-DBDS', REPOS_DBUSER_PREFIX + '_IAU_APPEND', REPOS_DBPASSWORD, REPOS_DBURL)
 change_datasource('opss-audit-viewDS', REPOS_DBUSER_PREFIX + '_IAU_VIEWER', REPOS_DBPASSWORD, REPOS_DBURL)
-change_datasource('opss-data-source', REPOS_DBUSER_PREFIX + '_OPSS', REPOS_DBPASSWORD, REPOS_DBURL)
 
 print 'Finished datasources'
 
-print 'Call getDatabaseDefaults which reads the service table'
-getDatabaseDefaults()
-
 updateDomain()
+dumpStack()
 closeDomain()
 
 print 'Exiting...'
