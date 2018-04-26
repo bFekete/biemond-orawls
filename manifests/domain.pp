@@ -98,6 +98,8 @@
 # @param puppet_os_user the username under puppet should be executed
 # @param create_default_coherence_cluster option to skip the coherence cluster template be added to the domain
 # @param wcs_satellite if true it loads just Oracle WebCenter Sites - Satellite Server template
+# @param custom_extension_puppet_location The location of the python/puppet erb template in a puppet module to extend the domain
+# @param custom_wlst_path The wlst path. Optionally used when domain_template is custom
 #
 define orawls::domain (
   Integer $version                                        = $::orawls::weblogic::version,
@@ -106,7 +108,7 @@ define orawls::domain (
   String $jdk_home_dir                                    = $::orawls::weblogic::jdk_home_dir,
   Optional[String] $wls_domains_dir                       = $::orawls::weblogic::wls_domains_dir,
   Optional[String] $wls_apps_dir                          = $::orawls::weblogic::wls_apps_dir,
-  String $domain_template                                 = 'standard', # adf|adf_restricted|forms|osb|osb_soa_bpm|osb_soa|soa|soa_bpm|bam|wc|wcs|wc_wcc_bpm|oud|ohs_standalone|ohs_collocated
+  String $domain_template                                 = 'standard', # adf|adf_restricted|forms|osb|osb_soa_bpm|osb_soa|soa|soa_bpm|bam|wc|wcs|wc_wcc_bpm|oud|ohs_standalone|ohs_collocated|custom
   Boolean $bam_enabled                                    = true,  #only for SOA Suite
   Boolean $b2b_enabled                                    = false, #only for SOA Suite 12.1.3 with b2b
   Boolean $ess_enabled                                    = false, #only for SOA Suite 12.1.3
@@ -158,6 +160,8 @@ define orawls::domain (
   String $puppet_os_user                                  = 'root',
   Boolean $create_default_coherence_cluster               = true,
   Boolean $wcs_satellite                                  = false,
+  Optional[String] $custom_extension_puppet_location      = undef, # module_name/custom_template.py.erb
+  Optional[String] $custom_wlst_path                      = undef,
 )
 {
   if ( $wls_domains_dir == undef or $wls_domains_dir == '' ) {
@@ -531,9 +535,25 @@ define orawls::domain (
       else {
         $wlstPath      = "${middleware_home_dir}/Oracle_WCC1/common/bin"
       }
+    } elsif $domain_template == 'custom' {
+      if $custom_extension_puppet_location == undef {
+        fail('custom_extension_puppet_location must be specified when domain_template is custom.')
+      } else {
+        $extensionsTemplateFile = $custom_extension_puppet_location
+        if $custom_wlst_path == undef {
+          # Trying to set the correct WLST PATH
+          if ( $version >= 1221 ) {
+            $wlstPath      = "${middleware_home_dir}/oracle_common/common/bin"
+          }
+          else {
+            $wlstPath      = "${weblogic_home_dir}/common/bin" 
+          }
+        } else {
+          $wlstPath = $custom_wlst_path
+        }
+      }
     } else {
-      $extensionsTemplateFile = undef
-
+      $extensionsTemplateFile = undef 
       $wlstPath       = "${weblogic_home_dir}/common/bin"
     }
 
@@ -728,7 +748,7 @@ define orawls::domain (
     }
 
     # FMW RCU only for wls 12.1.2 or higher and when template is not standard
-    if ( $version >= 1212 and $domain_template != 'standard' and $domain_template != 'adf_restricted' and $domain_template != 'ohs_standalone' ) {
+    if ( $version >= 1212 and $domain_template != 'standard' and $domain_template != 'adf_restricted' and $domain_template != 'ohs_standalone'  and $domain_template != 'custom') {
 
       if ( $domain_template == 'adf' ) {
         $rcu_domain_template = 'adf'
